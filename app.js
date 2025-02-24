@@ -62,12 +62,20 @@ function parseXYZ(data) {
       }
     }
   });
+
+  // Debug : Affiche les positions et les couleurs
+  console.log('Positions:', positions);
+  console.log('Colors:', colors);
+
   return { positions, colors };
 }
-
 // Fonction pour créer un nuage de points
 function createPointCloud(data) {
-  scene.children = scene.children.filter(child => !(child instanceof THREE.Points)); // Supprimer l'ancien nuage
+  // Debug : Vérifie si les données sont correctes
+  console.log("Création du nuage de points avec", data.positions.length / 3, "points");
+
+  // Supprimer l'ancien nuage
+  scene.children = scene.children.filter(child => !(child instanceof THREE.Points)); 
 
   const geometry = new THREE.BufferGeometry();
   const vertices = new Float32Array(data.positions);
@@ -79,6 +87,9 @@ function createPointCloud(data) {
   pointMaterial = new THREE.PointsMaterial({ vertexColors: true, size: 0.1 });
   const pointCloud = new THREE.Points(geometry, pointMaterial);
   scene.add(pointCloud);
+
+  // Debug : Vérifie que le nuage de points est bien ajouté à la scène
+  console.log('Nuage de points ajouté à la scène');
 }
 
 // Mise à jour de la couleur en temps réel (en cas de changement via la palette)
@@ -91,6 +102,8 @@ colorPicker.addEventListener('input', (event) => {
 function animate() {
   requestAnimationFrame(animate);
   controls.update(); // Met à jour la rotation de la souris
+
+  console.log('Rendu en cours'); // Debug pour vérifier que l'animation se lance
   renderer.render(scene, camera);
 }
 animate();
