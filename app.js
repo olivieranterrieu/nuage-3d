@@ -8,6 +8,23 @@ document.body.appendChild(renderer.domElement);
 // Position initiale de la caméra
 camera.position.z = 5;
 
+// Ajout des contrôles de la souris
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; // Améliore le mouvement fluide
+controls.dampingFactor = 0.05;
+
+// Interface pour changer la couleur des points
+const colorPicker = document.createElement('input');
+colorPicker.type = 'color';
+colorPicker.value = '#ff0000';
+colorPicker.style.position = 'absolute';
+colorPicker.style.top = '10px';
+colorPicker.style.right = '10px';
+colorPicker.style.zIndex = '10';
+document.body.appendChild(colorPicker);
+
+let pointMaterial;  // Matériau des points
+
 // Gestionnaire de fichiers pour charger un .xyz
 document.getElementById('fileInput').addEventListener('change', function(event) {
   const file = event.target.files[0];
@@ -22,44 +39,58 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
   }
 });
 
-// Fonction pour parser le fichier XYZ
+// Fonction pour parser le fichier XYZ (en prenant en compte la couleur RGB)
 function parseXYZ(data) {
   const lines = data.split('\n');
   const positions = [];
+  const colors = [];
   lines.forEach(line => {
     line = line.trim();
     if (line !== "") {
       const parts = line.split(/\s+/);
-      if (parts.length >= 3) {
+      if (parts.length >= 6) {
         const x = parseFloat(parts[0]);
         const y = parseFloat(parts[1]);
         const z = parseFloat(parts[2]);
-        if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+        const r = parseInt(parts[3], 10) / 255;  // Normalisation des couleurs
+        const g = parseInt(parts[4], 10) / 255;
+        const b = parseInt(parts[5], 10) / 255;
+        if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(r) && !isNaN(g) && !isNaN(b)) {
           positions.push(x, y, z);
+          colors.push(r, g, b);  // Ajout des couleurs RGB
         }
       }
     }
   });
-  return positions;
+  return { positions, colors };
 }
 
 // Fonction pour créer un nuage de points
-function createPointCloud(positions) {
+function createPointCloud(data) {
   scene.children = scene.children.filter(child => !(child instanceof THREE.Points)); // Supprimer l'ancien nuage
 
   const geometry = new THREE.BufferGeometry();
-  const vertices = new Float32Array(positions);
+  const vertices = new Float32Array(data.positions);
+  const vertexColors = new Float32Array(data.colors);
+  
   geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(vertexColors, 3));
 
-  const material = new THREE.PointsMaterial({ color: 0xff0000, size: 0.1 });
-  const pointCloud = new THREE.Points(geometry, material);
+  pointMaterial = new THREE.PointsMaterial({ vertexColors: true, size: 0.1 });
+  const pointCloud = new THREE.Points(geometry, pointMaterial);
   scene.add(pointCloud);
 }
 
-// Animation pour rendre la scène
+// Mise à jour de la couleur en temps réel (en cas de changement via la palette)
+colorPicker.addEventListener('input', (event) => {
+  const color = new THREE.Color(event.target.value);
+  pointMaterial.color.set(color);
+});
+
+// Animation et rendu de la scène
 function animate() {
   requestAnimationFrame(animate);
-  scene.rotation.y += 0.001;
+  controls.update(); // Met à jour la rotation de la souris
   renderer.render(scene, camera);
 }
 animate();
