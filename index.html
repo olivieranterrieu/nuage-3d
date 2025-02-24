@@ -4,16 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nuage de Points 3D</title>
+
+  <!-- Inclusion de la bibliothèque THREE.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
-    input { position: absolute; top: 10px; left: 10px; z-index: 10; }
-  </style>
+  
+  <!-- Inclusion de OrbitControls.js pour contrôler la rotation avec la souris -->
+  <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
 </head>
 <body>
-  <input type="file" id="fileInput" accept=".xyz" />
-  <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+  <!-- Ajouter un input pour charger le fichier .xyz -->
+  <input type="file" id="fileInput" accept=".xyz" style="position: absolute; top: 10px; left: 10px; z-index: 10;">
+  
+  <!-- Le script app.js qui contient le code de ton application -->
   <script src="app.js"></script>
 </body>
 </html>
